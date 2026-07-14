@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { BASE_API_URL } from "@/lib/api";
+import { BASE_API_URL, getImageUrl } from "@/lib/api";
 
 const NewsCard = ({
   slug,
@@ -58,75 +58,67 @@ const NewsCard = ({
           border-radius: 12px;
           box-shadow: 0px 10px 12px rgba(0, 0, 0, 0.08),
             -4px -4px 12px rgba(0, 0, 0, 0.04);
-          overflow: hidden;
-          transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-          cursor: pointer;
-          box-sizing: border-box;
           padding: 10px;
+          text-decoration: none;
+          box-sizing: border-box;
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         html.dark .news-card-wrapper .news-card {
           background-color: #1e293b;
-          box-shadow: 0px 10px 12px rgba(0, 0, 0, 0.25),
-            -4px -4px 12px rgba(0, 0, 0, 0.2);
+          box-shadow: 0px 10px 12px rgba(0, 0, 0, 0.3);
         }
 
         .news-card-wrapper .news-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 25px -5px rgba(18, 107, 241, 0.12), 0 8px 10px -6px rgba(18, 107, 241, 0.08), 0px 4px 6px -1px rgba(0,0,0,0.04);
-        }
-
-        html.dark .news-card-wrapper .news-card:hover {
-          box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.2), 0 8px 10px -6px rgba(59, 130, 246, 0.15), 0px 4px 6px -1px rgba(0,0,0,0.06);
+          transform: translateY(-3px);
+          box-shadow: 0px 14px 20px rgba(0, 0, 0, 0.12);
         }
 
         .news-card-wrapper .news-card-image {
           width: 100%;
-          height: 50%;
-          border-radius: 10px;
-          margin-bottom: 10px;
+          height: 140px;
+          border-radius: 8px;
           overflow: hidden;
-          background-color: #e2e8f0;
+          background-color: #f1f5f9;
           flex-shrink: 0;
         }
- 
+
         html.dark .news-card-wrapper .news-card-image {
           background-color: #334155;
         }
- 
+
         .news-card-wrapper .news-card-image img {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          display: block;
         }
- 
+
         .news-card-wrapper .news-card-title {
-          margin: 0 0 4px 0;
           font-size: 15px;
-          font-family: 'Inter', 'Segoe UI', sans-serif;
           font-weight: 700;
+          font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
           color: #0f172a;
+          margin-top: 10px;
+          margin-bottom: 4px;
+          line-height: 1.35;
           display: -webkit-box;
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
-          line-height: 1.35;
         }
- 
+
         html.dark .news-card-wrapper .news-card-title {
-          color: #f1f5f9;
+          color: #f8fafc;
         }
- 
+
         .news-card-wrapper .news-card-des {
+          font-size: 12.5px;
+          color: #64748b;
+          margin: 0;
           display: -webkit-box;
           -webkit-line-clamp: 3;
           -webkit-box-orient: vertical;
           overflow: hidden;
-          margin: 0 0 auto 0;
-          font-size: 12.5px;
-          font-family: 'Inter', 'Segoe UI', sans-serif;
-          color: #64748b;
           line-height: 1.5;
         }
 
@@ -138,7 +130,7 @@ const NewsCard = ({
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-top: 8px;
+          margin-top: auto;
           padding-top: 8px;
           border-top: 1px solid #f1f5f9;
           gap: 6px;
@@ -158,21 +150,20 @@ const NewsCard = ({
 
         .news-card-wrapper .news-card-meta-author {
           font-size: 11.5px;
-          font-family: 'Inter', 'Segoe UI', sans-serif;
-          font-weight: 500;
-          color: #475569;
+          font-weight: 600;
+          color: #3b82f6;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
 
         html.dark .news-card-wrapper .news-card-meta-author {
-          color: #cbd5e1;
+          color: #60a5fa;
         }
 
         .news-card-wrapper .news-card-meta-dot {
-          font-size: 11px;
-          color: #94a3b8;
+          color: #cbd5e1;
+          font-size: 10px;
           flex-shrink: 0;
         }
 
@@ -214,7 +205,7 @@ const NewsCard = ({
           <div className="news-card-image">
             {image && (
               <img
-                src={`${BASE_API_URL}/storage/${image}`}
+                src={getImageUrl(image)}
                 alt={title || "Berita HMTI"}
                 loading="lazy"
               />
