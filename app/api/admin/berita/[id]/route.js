@@ -32,7 +32,7 @@ export async function PUT(request, { params }) {
 
     let thumbnailKey = beritaOld.thumbnail;
     const thumbnailFile = formData.get('thumbnail');
-    if (thumbnailFile && thumbnailFile.size > 0) {
+    if (thumbnailFile && typeof thumbnailFile === 'object' && thumbnailFile.size > 0) {
       if (beritaOld.thumbnail) await deleteFromR2(beritaOld.thumbnail);
       const buffer = Buffer.from(await thumbnailFile.arrayBuffer());
       thumbnailKey = await uploadToR2(buffer, 'berita', thumbnailFile.name);
@@ -48,14 +48,13 @@ export async function PUT(request, { params }) {
     }
 
     const extraFiles = formData.getAll('foto_tambahan[]');
-    if (extraFiles.length > 0 && extraFiles[0] && extraFiles[0].size > 0) {
-      // Clear old extra photos
+    if (extraFiles.length > 0 && extraFiles[0] && typeof extraFiles[0] === 'object' && extraFiles[0].size > 0) {
       for (const oldKey of fotoTambahanKeys) {
         await deleteFromR2(oldKey);
       }
       fotoTambahanKeys = [];
       for (const file of extraFiles) {
-        if (file && file.size > 0) {
+        if (file && typeof file === 'object' && file.size > 0) {
           const buffer = Buffer.from(await file.arrayBuffer());
           const key = await uploadToR2(buffer, 'berita', file.name);
           fotoTambahanKeys.push(key);
@@ -115,6 +114,10 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
+}
+
+export async function POST(request, context) {
+  return PUT(request, context);
 }
 
 export async function DELETE(request, { params }) {

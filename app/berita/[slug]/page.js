@@ -5,13 +5,16 @@ import Link from "next/link";
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { dateFormat } from "@/lib/date-libs";
-import { BASE_API_URL, BASE_API_KEY } from "@/lib/api";
+import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
 import OtherNews from "@/components/OtherNews";
 import BounceLoading from "@/components/BounceLoading";
 import NotFound from "@/components/NotFound";
 
 const DetailBeritaPage = () => {
   const { slug } = useParams();
+  const [berita, setBerita] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [activeImage, setActiveImage] = useState(null);
 
   const fetchBerita = async () => {
@@ -24,10 +27,10 @@ const DetailBeritaPage = () => {
         },
       });
       setBerita(response.data);
-      if (response.data?.gambar) {
-        setActiveImage(response.data.gambar);
+      if (response.data?.gambar || response.data?.thumbnail) {
+        setActiveImage(response.data.gambar || response.data.thumbnail);
       }
-    } catch (error) {
+    } catch {
       setError(true);
     }
     setLoading(false);
@@ -38,7 +41,7 @@ const DetailBeritaPage = () => {
   }, [slug]);
 
   const allPhotos = [
-    ...(berita?.gambar ? [berita.gambar] : []),
+    ...(berita?.gambar || berita?.thumbnail ? [berita.gambar || berita.thumbnail] : []),
     ...(Array.isArray(berita?.foto_tambahan) ? berita.foto_tambahan : []),
   ];
 
@@ -51,7 +54,7 @@ const DetailBeritaPage = () => {
       <NotFound
         msg="Sepertinya berita yang anda cari tidak ditemukan."
         btnText="Kembali ke Berita"
-        btnLink="/berita/kategori/semua-berita"
+        btnLink="/berita"
       />
     );
   }
@@ -64,7 +67,7 @@ const DetailBeritaPage = () => {
         {/* Premium Back Button */}
         <div className="mb-6">
           <Link
-            href="/berita/kategori/semua-berita"
+            href="/berita"
             className="inline-flex items-center gap-2 text-sm font-semibold text-good-blue hover:text-blue-600 transition-colors group"
           >
             <svg
@@ -89,7 +92,7 @@ const DetailBeritaPage = () => {
             Beranda
           </Link>
           <span>/</span>
-          <Link href="/berita/kategori/semua-berita" className="hover:text-good-blue transition-colors duration-200">
+          <Link href="/berita" className="hover:text-good-blue transition-colors duration-200">
             Post
           </Link>
           <span>/</span>
@@ -105,7 +108,7 @@ const DetailBeritaPage = () => {
             <svg className="w-4 h-4 text-gray-400 fill-current" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M6 2a1 1 0 00-1-1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V4a2 2 0 00-2-2h-1V1a1 1 0 10-2 0v1H7V1a1 1 0 00-1-1zM4 5h12v3H4V5zm0 5h12v5H4v-5z" clipRule="evenodd" />
             </svg>
-            <span>{dateFormat(berita?.created_at)}</span>
+            <span>{dateFormat(berita?.created_at || berita?.published_at)}</span>
           </div>
 
           {/* Author */}
@@ -121,7 +124,7 @@ const DetailBeritaPage = () => {
             <svg className="w-4 h-4 text-gray-400 fill-current" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M17.707 9.293a1 1 0 020 1.414l-7 7a1 1 0 02-1.414 0l-7-7A1 1 0 023 9V3a1 1 0 021-1h6a1 1 0 02.707.293l7 7zM6 6a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
             </svg>
-            <span>Post</span>
+            <span>{berita?.kategori || "Post"}</span>
           </div>
 
           {/* Views */}
@@ -146,7 +149,7 @@ const DetailBeritaPage = () => {
         <div className="w-full flex flex-col gap-3 mb-8">
           <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 bg-black/5 flex items-center justify-center">
             <img
-              src={`${BASE_API_URL}/storage/${activeImage || berita?.gambar}`}
+              src={getImageUrl(activeImage || berita?.gambar || berita?.thumbnail)}
               alt={berita?.judul}
               className="w-full max-h-[520px] object-cover transition-all duration-300"
             />
@@ -160,7 +163,7 @@ const DetailBeritaPage = () => {
               </span>
               <div className="flex items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0">
                 {allPhotos.map((imgSrc, idx) => {
-                  const isActive = (activeImage || berita?.gambar) === imgSrc;
+                  const isActive = (activeImage || berita?.gambar || berita?.thumbnail) === imgSrc;
                   return (
                     <button
                       key={idx}
@@ -173,7 +176,7 @@ const DetailBeritaPage = () => {
                       }`}
                     >
                       <img
-                        src={`${BASE_API_URL}/storage/${imgSrc}`}
+                        src={getImageUrl(imgSrc)}
                         alt={`Dokumentasi ${idx + 1}`}
                         className="w-full h-full object-cover"
                       />
