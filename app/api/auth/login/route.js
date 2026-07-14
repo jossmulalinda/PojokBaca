@@ -24,7 +24,7 @@ export async function POST(request) {
     });
 
     if (result.rows.length === 0) {
-      return NextResponse.json({ message: 'Kredensial tidak cocok dengan data kami' }, { status: 401 });
+      return NextResponse.json({ message: 'Username atau password salah. Silakan coba lagi.' }, { status: 401 });
     }
 
     const user = result.rows[0];
@@ -36,7 +36,7 @@ export async function POST(request) {
 
     const passwordMatch = await comparePassword(password, user.password);
     if (!passwordMatch) {
-      return NextResponse.json({ message: 'Kredensial tidak cocok dengan data kami' }, { status: 401 });
+      return NextResponse.json({ message: 'Username atau password salah. Silakan coba lagi.' }, { status: 401 });
     }
 
     const token = generateToken({
@@ -56,11 +56,19 @@ export async function POST(request) {
       profile_image: user.profile_image
     };
 
-    return NextResponse.json({
+    const responsePayload = {
       message: 'Login berhasil',
       token,
-      user: userPayload
-    });
+      access_token: token,
+      user: userPayload,
+      data: {
+        token,
+        access_token: token,
+        user: userPayload
+      }
+    };
+
+    return NextResponse.json(responsePayload);
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
