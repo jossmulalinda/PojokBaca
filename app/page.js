@@ -10,8 +10,10 @@ import SectionTitle from "@/components/Beranda/SectionTitle";
 import EventCard from "@/components/Beranda/EventCard";
 import NewsCard from "@/components/Beranda/NewsCard";
 import NewsCardSmartphone from "@/components/Beranda/NewsCardSmartphone";
-import ImageCard from "@/components/Beranda/ImageCard";
 import ImageCardSkeleton from "@/components/Beranda/ImageCardSkeleton";
+import NewsCardSmartphoneSkeleton from "@/components/Beranda/NewsCardSmartphoneSkeleton";
+import NewsCardSkeleton from "@/components/Beranda/NewsCardSkeleton";
+import Partners from "@/components/Beranda/Partners";
 import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
 
 const processKontenHtml = (html) => {
