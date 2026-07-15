@@ -28,14 +28,17 @@ export async function PUT(request, { params }) {
       hashedPassword = await hashPassword(password);
     }
 
+    const finalUsername = username || name || userOld.username;
+    const finalEmail = email || userOld.email;
+    const finalRole = role || userOld.role;
+
     await db.execute({
-      sql: 'UPDATE users SET name = ?, email = ?, username = ?, password = ?, role = ?, updated_at = DATETIME("now") WHERE id = ?',
+      sql: 'UPDATE users SET username = ?, email = ?, password = ?, role = ?, updated_at = DATETIME("now") WHERE id = ?',
       args: [
-        name || userOld.name,
-        email || userOld.email,
-        username || userOld.username,
+        finalUsername,
+        finalEmail,
         hashedPassword,
-        role || userOld.role,
+        finalRole,
         id
       ]
     });
@@ -44,6 +47,10 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
+}
+
+export async function POST(request, context) {
+  return PUT(request, context);
 }
 
 export async function DELETE(request, { params }) {

@@ -10,6 +10,14 @@ import OtherNews from "@/components/OtherNews";
 import BounceLoading from "@/components/BounceLoading";
 import NotFound from "@/components/NotFound";
 
+const processKontenHtml = (html) => {
+  if (!html) return "";
+  const r2PublicUrl = "https://pub-dde94dbcda2d41c3968385f7f9df0370.r2.dev";
+  return html
+    .replace(/src=["'](?:https?:\/\/[^\/]+)?\/?storage\//gi, `src="${r2PublicUrl}/`)
+    .replace(/src=["']\/(berita|galeri|events|partners|pengurus)\//gi, `src="${r2PublicUrl}/$1/`);
+};
+
 const DetailBeritaPage = () => {
   const { slug } = useParams();
   const [berita, setBerita] = useState(null);
@@ -40,8 +48,10 @@ const DetailBeritaPage = () => {
     fetchBerita();
   }, [slug]);
 
+  const mainImage = activeImage || berita?.gambar || berita?.thumbnail;
+
   const allPhotos = [
-    ...(berita?.gambar || berita?.thumbnail ? [berita.gambar || berita.thumbnail] : []),
+    ...(mainImage ? [mainImage] : []),
     ...(Array.isArray(berita?.foto_tambahan) ? berita.foto_tambahan : []),
   ];
 
@@ -146,61 +156,63 @@ const DetailBeritaPage = () => {
         </h1>
 
         {/* Header Image & Interactive Photo Switcher Gallery */}
-        <div className="w-full flex flex-col gap-3 mb-8">
-          <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 bg-black/5 flex items-center justify-center">
-            <img
-              src={getImageUrl(activeImage || berita?.gambar || berita?.thumbnail)}
-              alt={berita?.judul}
-              className="w-full max-h-[520px] object-cover transition-all duration-300"
-            />
-          </div>
-
-          {/* Additional Photos Thumbnail Switcher */}
-          {allPhotos.length > 1 && (
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80">
-              <span className="text-xs font-bold text-slate-600 dark:text-slate-400 flex-shrink-0">
-                Dokumentasi ({allPhotos.length} Foto):
-              </span>
-              <div className="flex items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0">
-                {allPhotos.map((imgSrc, idx) => {
-                  const isActive = (activeImage || berita?.gambar || berita?.thumbnail) === imgSrc;
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setActiveImage(imgSrc)}
-                      className={`relative w-20 h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer flex-shrink-0 ${
-                        isActive
-                          ? "border-blue-600 ring-2 ring-blue-500/30 scale-105"
-                          : "border-slate-200 dark:border-slate-700 opacity-60 hover:opacity-100 hover:border-blue-400"
-                      }`}
-                    >
-                      <img
-                        src={getImageUrl(imgSrc)}
-                        alt={`Dokumentasi ${idx + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                      {idx === 0 ? (
-                        <span className="absolute top-1 left-1 bg-blue-600 text-white text-[8px] font-extrabold px-1 rounded shadow">
-                          Sampul
-                        </span>
-                      ) : (
-                        <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] font-extrabold px-1 rounded shadow">
-                          Foto {idx + 1}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+        {mainImage && (
+          <div className="w-full flex flex-col gap-3 mb-8">
+            <div className="w-full overflow-hidden rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 bg-black/5 flex items-center justify-center">
+              <img
+                src={getImageUrl(mainImage)}
+                alt={berita?.judul}
+                className="w-full max-h-[520px] object-cover transition-all duration-300"
+              />
             </div>
-          )}
-        </div>
+
+            {/* Additional Photos Thumbnail Switcher */}
+            {allPhotos.length > 1 && (
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 bg-slate-50 dark:bg-slate-900/60 p-3 rounded-2xl border border-slate-100 dark:border-slate-800/80">
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 flex-shrink-0">
+                  Dokumentasi ({allPhotos.length} Foto):
+                </span>
+                <div className="flex items-center gap-2.5 overflow-x-auto pb-1 sm:pb-0">
+                  {allPhotos.map((imgSrc, idx) => {
+                    const isActive = mainImage === imgSrc;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setActiveImage(imgSrc)}
+                        className={`relative w-20 h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer flex-shrink-0 ${
+                          isActive
+                            ? "border-blue-600 ring-2 ring-blue-500/30 scale-105"
+                            : "border-slate-200 dark:border-slate-700 opacity-60 hover:opacity-100 hover:border-blue-400"
+                        }`}
+                      >
+                        <img
+                          src={getImageUrl(imgSrc)}
+                          alt={`Dokumentasi ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {idx === 0 ? (
+                          <span className="absolute top-1 left-1 bg-blue-600 text-white text-[8px] font-extrabold px-1 rounded shadow">
+                            Sampul
+                          </span>
+                        ) : (
+                          <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[8px] font-extrabold px-1 rounded shadow">
+                            Foto {idx + 1}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Article Body Content */}
         <div
           className="text-justify leading-relaxed text-slate-700 dark:text-slate-200 text-sm md:text-base font-normal space-y-6 prose dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: berita?.konten }}
+          dangerouslySetInnerHTML={{ __html: processKontenHtml(berita?.konten) }}
         />
       </div>
 

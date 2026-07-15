@@ -923,7 +923,7 @@ export default function StrukturAdmin() {
     }
   };
 
-  const getFotoSrc = (path) => {
+  const fotoUrl = (path) => {
     if (!path) return placeholderImg;
     return getImageUrl(path);
   };

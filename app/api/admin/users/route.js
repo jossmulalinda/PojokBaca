@@ -10,8 +10,12 @@ export async function GET(request) {
 
   try {
     const db = getDb();
-    const result = await db.execute('SELECT id, name, email, username, role, is_active, profile_image, created_at FROM users ORDER BY created_at DESC');
-    return NextResponse.json(result.rows);
+    const result = await db.execute('SELECT id, username, email, role, is_active, profile_image, created_at FROM users ORDER BY created_at DESC');
+    const data = result.rows.map(u => ({
+      ...u,
+      name: u.username
+    }));
+    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
@@ -27,14 +31,16 @@ export async function POST(request) {
   try {
     const { name, email, username, password, role } = await request.json();
 
-    if (!name || !email || !password) {
-      return NextResponse.json({ message: 'Nama, email, dan password wajib diisi' }, { status: 422 });
+    if (!email || !password) {
+      return NextResponse.json({ message: 'Email dan password wajib diisi' }, { status: 422 });
     }
+
+    const finalUsername = username || name || email.split('@')[0];
 
     const db = getDb();
     const existing = await db.execute({
       sql: 'SELECT * FROM users WHERE email = ? OR username = ? LIMIT 1',
-      args: [email, username || email]
+      args: [email, finalUsername]
     });
 
     if (existing.rows.length > 0) {
@@ -43,18 +49,18 @@ export async function POST(request) {
 
     const hashedPassword = await hashPassword(password);
     const userRole = role || 'admin';
-    const isActive = 1; // Direct creation by super_admin is active by default
+    const isActive = 1;
 
     const insertResult = await db.execute({
-      sql: 'INSERT INTO users (name, email, username, password, role, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, DATETIME("now"), DATETIME("now"))',
-      args: [name, email, username || email.split('@')[0], hashedPassword, userRole, isActive]
+      sql: 'INSERT INTO users (username, email, password, role, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, DATETIME("now"), DATETIME("now"))',
+      args: [finalUsername, email, hashedPassword, userRole, isActive]
     });
 
     return NextResponse.json({
       id: Number(insertResult.lastInsertRowid),
-      name,
+      name: finalUsername,
+      username: finalUsername,
       email,
-      username: username || email.split('@')[0],
       role: userRole,
       is_active: true,
       message: 'Admin baru berhasil dibuat'
