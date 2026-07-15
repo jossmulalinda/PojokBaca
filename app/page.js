@@ -1,5 +1,6 @@
 'use client';
 
+// Trigger fresh Vercel build with full component imports
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import AOS from "aos";
