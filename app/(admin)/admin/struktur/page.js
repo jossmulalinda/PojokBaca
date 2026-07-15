@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { BASE_API_URL, BASE_API_KEY } from "@/lib/api";
+import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
 import { useSelector } from "react-redux";
 import { selectAuthData } from "@/lib/redux/authSlice";
 import * as XLSX from "xlsx";
@@ -32,11 +32,7 @@ const PengurusModal = ({ pengurus, bidangList, divisiList, pengurusList, allowed
   });
   const [foto, setFoto] = useState(null);
   const [preview, setPreview] = useState(
-    pengurus?.foto
-      ? pengurus.foto.startsWith("http")
-        ? pengurus.foto
-        : `${BASE_API_URL}${pengurus.foto.startsWith("/") ? "" : "/"}${pengurus.foto}`
-      : null
+    pengurus?.foto ? getImageUrl(pengurus.foto) : null
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -927,10 +923,9 @@ export default function StrukturAdmin() {
     }
   };
 
-  const fotoUrl = (path) => {
+  const getFotoSrc = (path) => {
     if (!path) return placeholderImg;
-    if (path.startsWith("http")) return path;
-    return `${BASE_API_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+    return getImageUrl(path);
   };
 
   // Pengelompokan Jabatan

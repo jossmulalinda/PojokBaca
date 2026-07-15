@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { BASE_API_URL, BASE_API_KEY } from "@/lib/api";
+import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
 import { useSelector } from "react-redux";
 import { selectAuthData } from "@/lib/redux/authSlice";
 import { useToast } from "@/components/Admin/ToastProvider";
@@ -412,11 +412,7 @@ export default function GaleriAdmin() {
           {/* Grid Layout */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {photos.map((photo) => {
-              const imgUrl = photo.foto
-                ? photo.foto.startsWith("http")
-                  ? photo.foto
-                  : `${BASE_API_URL}${photo.foto.startsWith("/") ? "" : "/"}${photo.foto}`
-                : "/assets/img/galeryIMG.png";
+              const imgUrl = photo.foto ? getImageUrl(photo.foto) : "/assets/img/galeryIMG.png";
 
               return (
                 <div

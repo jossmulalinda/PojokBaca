@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { BASE_API_URL, BASE_API_KEY } from "@/lib/api";
+import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
 import { useSelector } from "react-redux";
 import { selectAuthData } from "@/lib/redux/authSlice";
 import { useToast } from "@/components/Admin/ToastProvider";
@@ -30,11 +30,7 @@ const EventModal = ({ eventItem, onClose, onSaved, token }) => {
   });
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(
-    eventItem?.image
-      ? eventItem.image.startsWith("http")
-        ? eventItem.image
-        : `${BASE_API_URL}${eventItem.image.startsWith("/") ? "" : "/"}${eventItem.image}`
-      : null
+    eventItem?.image ? getImageUrl(eventItem.image) : null
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -431,11 +427,7 @@ export default function EventsAdmin() {
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-800 text-sm text-gray-700 dark:text-gray-300">
                 {events.map((event) => {
-                  const imgUrl = event.image
-                    ? event.image.startsWith("http")
-                      ? event.image
-                      : `${BASE_API_URL}${event.image.startsWith("/") ? "" : "/"}${event.image}`
-                    : "/assets/img/marchevent-min.JPG";
+                  const imgUrl = event.image ? getImageUrl(event.image) : "/assets/img/marchevent-min.JPG";
 
                   return (
                     <tr key={event.id} className="hover:bg-gray-50/40 dark:hover:bg-gray-800/10 transition-colors">

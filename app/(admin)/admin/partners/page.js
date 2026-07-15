@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { BASE_API_URL, BASE_API_KEY } from "@/lib/api";
+import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
 import { useSelector } from "react-redux";
 import { selectAuthData } from "@/lib/redux/authSlice";
 import { useToast } from "@/components/Admin/ToastProvider";
@@ -29,11 +29,7 @@ const PartnerModal = ({ partner, onClose, onSaved, token }) => {
   });
   const [logo, setLogo] = useState(null);
   const [preview, setPreview] = useState(
-    partner?.logo
-      ? partner.logo.startsWith("http")
-        ? partner.logo
-        : `${BASE_API_URL}${partner.logo.startsWith("/") ? "" : "/"}${partner.logo}`
-      : null
+    partner?.logo ? getImageUrl(partner.logo) : null
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -380,8 +376,7 @@ export default function PartnersAdmin() {
 
   const getLogoSrc = (logoPath) => {
     if (!logoPath) return "";
-    if (logoPath.startsWith("http")) return logoPath;
-    return `${BASE_API_URL}${logoPath.startsWith("/") ? "" : "/"}${logoPath}`;
+    return getImageUrl(logoPath);
   };
 
   return (

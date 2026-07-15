@@ -44,11 +44,7 @@ const BeritaModal = ({ berita, onClose, onSaved, token }) => {
   });
   const [thumbnail, setThumbnail] = useState(null);
   const [preview, setPreview] = useState(
-    berita?.thumbnail
-      ? berita.thumbnail.startsWith("http")
-        ? berita.thumbnail
-        : `${BASE_API_URL}${berita.thumbnail.startsWith("/") ? "" : "/"}${berita.thumbnail}`
-      : null
+    berita?.thumbnail ? getImageUrl(berita.thumbnail) : null
   );
   
   // Foto Tambahan (Max 2 foto tambahan, Total 3 foto)
