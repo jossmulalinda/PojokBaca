@@ -43,13 +43,22 @@ const BeritaModal = ({ berita, onClose, onSaved, token }) => {
     published_at: berita?.created_at ? new Date(berita.created_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
   });
   const [thumbnail, setThumbnail] = useState(null);
+  const initialThumbnail = berita?.thumbnail || berita?.gambar;
   const [preview, setPreview] = useState(
-    berita?.thumbnail ? getImageUrl(berita.thumbnail) : null
+    initialThumbnail ? getImageUrl(initialThumbnail) : null
   );
   
+  const initialExtras = Array.isArray(berita?.foto_tambahan)
+    ? berita.foto_tambahan
+    : (typeof berita?.foto_tambahan === 'string'
+        ? (() => { try { return JSON.parse(berita.foto_tambahan); } catch { return []; } })()
+        : []);
+
   // Foto Tambahan (Max 2 foto tambahan, Total 3 foto)
   const [fotoTambahan, setFotoTambahan] = useState([]);
-  const [previewsTambahan, setPreviewsTambahan] = useState([]);
+  const [previewsTambahan, setPreviewsTambahan] = useState(
+    initialExtras.map(f => getImageUrl(f))
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

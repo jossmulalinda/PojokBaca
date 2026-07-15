@@ -43,7 +43,7 @@ export default function UserManagementPage() {
           "P3RT-HMTI-API-KEY": BASE_API_KEY,
         },
       });
-      setUsers(response.data.data);
+      setUsers(Array.isArray(response.data) ? response.data : (response.data?.data || []));
     } catch (err) {
       setError(err.response?.data?.message || "Gagal mengambil daftar admin.");
     } finally {
@@ -79,8 +79,9 @@ export default function UserManagementPage() {
           },
         }
       );
-      setUsers(users.map((u) => (u.id === user.id ? response.data.data : u)));
-      showToast(`Akun admin ${user.username} ${response.data.data.is_active ? 'berhasil diaktifkan!' : 'dinonaktifkan.'}`, "info");
+      const updatedUser = response.data?.data || response.data;
+      setUsers(users.map((u) => (u.id === user.id ? updatedUser : u)));
+      showToast(`Akun admin ${user.username} ${updatedUser.is_active ? 'berhasil diaktifkan!' : 'dinonaktifkan.'}`, "info");
     } catch (err) {
       showToast(err.response?.data?.message || "Gagal mengubah status aktif user.", "error");
     }
@@ -161,7 +162,8 @@ export default function UserManagementPage() {
           payload,
           { headers }
         );
-        setUsers(users.map((u) => (u.id === selectedUser.id ? response.data.data : u)));
+        const resUser = response.data?.data || response.data;
+        fetchUsers();
         showToast("Data admin berhasil diperbarui!", "success");
       } else {
         // Mode TAMBAH (POST)
@@ -170,7 +172,7 @@ export default function UserManagementPage() {
           form,
           { headers }
         );
-        setUsers([response.data.data, ...users]);
+        fetchUsers();
         showToast("Sub-admin baru berhasil dibuat!", "success");
       }
 
