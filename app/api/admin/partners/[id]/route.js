@@ -27,10 +27,10 @@ export async function PUT(request, { params }) {
 
     let logoKey = partnerOld.logo;
     const logoFile = formData.get('logo');
-    if (logoFile && logoFile.size > 0) {
+    if (logoFile && typeof logoFile === 'object' && typeof logoFile.arrayBuffer === 'function' && logoFile.size > 0) {
       if (partnerOld.logo) await deleteFromR2(partnerOld.logo);
       const buffer = Buffer.from(await logoFile.arrayBuffer());
-      logoKey = await uploadToR2(buffer, 'partners', logoFile.name);
+      logoKey = await uploadToR2(buffer, 'partners', logoFile.name || 'partner.jpg');
     }
 
     await db.execute({
@@ -42,6 +42,10 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
+}
+
+export async function POST(request, context) {
+  return PUT(request, context);
 }
 
 export async function DELETE(request, { params }) {

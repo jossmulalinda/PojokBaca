@@ -30,10 +30,10 @@ export async function PUT(request, { params }) {
 
     let fotoKey = pengurusOld.foto;
     const fotoFile = formData.get('foto');
-    if (fotoFile && fotoFile.size > 0) {
+    if (fotoFile && typeof fotoFile === 'object' && typeof fotoFile.arrayBuffer === 'function' && fotoFile.size > 0) {
       if (pengurusOld.foto) await deleteFromR2(pengurusOld.foto);
       const buffer = Buffer.from(await fotoFile.arrayBuffer());
-      fotoKey = await uploadToR2(buffer, 'pengurus', fotoFile.name);
+      fotoKey = await uploadToR2(buffer, 'pengurus', fotoFile.name || 'pengurus.jpg');
     }
 
     await db.execute({
@@ -56,6 +56,10 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
+}
+
+export async function POST(request, context) {
+  return PUT(request, context);
 }
 
 export async function DELETE(request, { params }) {

@@ -31,10 +31,10 @@ export async function PUT(request, { params }) {
 
     let posterKey = eventOld.poster;
     const posterFile = formData.get('poster') || formData.get('gambar');
-    if (posterFile && posterFile.size > 0) {
+    if (posterFile && typeof posterFile === 'object' && typeof posterFile.arrayBuffer === 'function' && posterFile.size > 0) {
       if (eventOld.poster) await deleteFromR2(eventOld.poster);
       const buffer = Buffer.from(await posterFile.arrayBuffer());
-      posterKey = await uploadToR2(buffer, 'events', posterFile.name);
+      posterKey = await uploadToR2(buffer, 'events', posterFile.name || 'event.jpg');
     }
 
     let isPublished = eventOld.is_published;
@@ -65,6 +65,10 @@ export async function PUT(request, { params }) {
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
+}
+
+export async function POST(request, context) {
+  return PUT(request, context);
 }
 
 export async function DELETE(request, { params }) {
