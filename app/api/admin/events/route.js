@@ -40,9 +40,9 @@ export async function POST(request) {
 
     let posterKey = '';
     const posterFile = formData.get('poster') || formData.get('gambar');
-    if (posterFile && posterFile.size > 0) {
+    if (posterFile && typeof posterFile === 'object' && typeof posterFile.arrayBuffer === 'function' && posterFile.size > 0) {
       const buffer = Buffer.from(await posterFile.arrayBuffer());
-      posterKey = await uploadToR2(buffer, 'events', posterFile.name);
+      posterKey = await uploadToR2(buffer, 'events', posterFile.name || 'event.jpg');
     }
 
     const db = getDb();

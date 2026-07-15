@@ -19,33 +19,33 @@ export async function POST(request) {
       return NextResponse.json({ message: 'Judul dokumentasi wajib diisi' }, { status: 422 });
     }
 
-    const files = formData.getAll('fotos[]').length > 0 ? formData.getAll('fotos[]') : [formData.get('foto')].filter(Boolean);
+    const rawFiles = formData.getAll('fotos[]').length > 0 ? formData.getAll('fotos[]') : [formData.get('foto')].filter(Boolean);
 
-    if (files.length === 0 || !files[0] || files[0].size === 0) {
-      return NextResponse.json({ message: 'Setidaknya 1 foto wajib diunggah' }, { status: 422 });
+    const validFiles = rawFiles.filter(f => f && typeof f === 'object' && typeof f.arrayBuffer === 'function' && f.size > 0);
+
+    if (validFiles.length === 0) {
+      return NextResponse.json({ message: 'Setidaknya 1 foto valid wajib diunggah' }, { status: 422 });
     }
 
     const db = getDb();
     const createdItems = [];
 
-    for (const file of files) {
-      if (file && file.size > 0) {
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const key = await uploadToR2(buffer, 'galeri', file.name);
+    for (const file of validFiles) {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const key = await uploadToR2(buffer, 'galeri', file.name || 'galeri.jpg');
 
-        const insertResult = await db.execute({
-          sql: 'INSERT INTO galeri (judul, foto, kategori, tanggal, created_at, updated_at) VALUES (?, ?, ?, ?, DATETIME("now"), DATETIME("now"))',
-          args: [judul, key, kategori, tanggal]
-        });
+      const insertResult = await db.execute({
+        sql: 'INSERT INTO galeri (judul, foto, kategori, tanggal, created_at, updated_at) VALUES (?, ?, ?, ?, DATETIME("now"), DATETIME("now"))',
+        args: [judul, key, kategori, tanggal]
+      });
 
-        createdItems.push({
-          id: Number(insertResult.lastInsertRowid),
-          judul,
-          foto: key,
-          kategori,
-          tanggal
-        });
-      }
+      createdItems.push({
+        id: Number(insertResult.lastInsertRowid),
+        judul,
+        foto: key,
+        kategori,
+        tanggal
+      });
     }
 
     return NextResponse.json({

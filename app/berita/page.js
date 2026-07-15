@@ -81,7 +81,10 @@ const BeritaPage = () => {
           "Content-Type": "application/json",
         },
       });
-      setBerita(response.data);
+      const beritaList = Array.isArray(response.data)
+        ? response.data
+        : (Array.isArray(response.data?.data) ? response.data.data : []);
+      setBerita(beritaList);
     } catch (error) {
       setBerita([]);
     } finally {

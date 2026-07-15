@@ -37,9 +37,9 @@ export async function POST(request) {
 
     let fotoKey = null;
     const fotoFile = formData.get('foto');
-    if (fotoFile && fotoFile.size > 0) {
+    if (fotoFile && typeof fotoFile === 'object' && typeof fotoFile.arrayBuffer === 'function' && fotoFile.size > 0) {
       const buffer = Buffer.from(await fotoFile.arrayBuffer());
-      fotoKey = await uploadToR2(buffer, 'pengurus', fotoFile.name);
+      fotoKey = await uploadToR2(buffer, 'pengurus', fotoFile.name || 'pengurus.jpg');
     }
 
     const db = getDb();

@@ -34,9 +34,9 @@ export async function POST(request) {
 
     let logoKey = '';
     const logoFile = formData.get('logo');
-    if (logoFile && logoFile.size > 0) {
+    if (logoFile && typeof logoFile === 'object' && typeof logoFile.arrayBuffer === 'function' && logoFile.size > 0) {
       const buffer = Buffer.from(await logoFile.arrayBuffer());
-      logoKey = await uploadToR2(buffer, 'partners', logoFile.name);
+      logoKey = await uploadToR2(buffer, 'partners', logoFile.name || 'partner.jpg');
     }
 
     const db = getDb();
