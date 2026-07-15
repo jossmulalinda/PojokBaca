@@ -1,12 +1,8 @@
 import React from "react";
-import { BASE_API_URL } from "@/lib/api";
+import { getImageUrl } from "@/lib/api";
 
 const ImageCard = ({ image, altText = "Image", className = "" }) => {
-  const imageUrl = `${BASE_API_URL}/storage/${image}`;
-
-  const handleError = (event) => {
-    event.target.src = "/assets/img/galeryIMG.png"; // fallback image
-  };
+  const imageUrl = getImageUrl(image);
 
   return (
     <div className={`gallery-card-wrapper ${className}`}>
@@ -68,12 +64,17 @@ const ImageCard = ({ image, altText = "Image", className = "" }) => {
 
       <div data-aos="fade-up" className="gallery-card">
         <div className="gallery-card-image">
-          <img
-            src={imageUrl}
-            alt={altText}
-            onError={handleError}
-            loading="lazy"
-          />
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={altText}
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+              No Image
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,12 +1,12 @@
 import React from "react";
-import { BASE_API_URL } from "@/lib/api";
+import { getImageUrl } from "@/lib/api";
 
 // Single partner card
 const PartnerCard = ({ image, name }) => (
   <div className="partner-marquee-card">
     <div className="partner-marquee-logo">
       <img
-        src={`${BASE_API_URL}/storage/${image}`}
+        src={getImageUrl(image)}
         alt={name || "Partner"}
         onError={(e) => {
           e.target.style.display = "none";
@@ -25,12 +25,8 @@ const PartnerCard = ({ image, name }) => (
 const Partners = ({ partners = [] }) => {
   if (!partners || partners.length === 0) return null;
 
-  // Duplicate enough times so the loop fills any screen width smoothly
-  // Minimum 6 copies so even 1 partner scrolls seamlessly
   const minCopies = Math.ceil(12 / partners.length);
   const items = Array.from({ length: Math.max(minCopies, 2) }, () => partners).flat();
-
-  // Speed: wider set = slightly faster, but always feels smooth
   const speed = Math.max(20, partners.length * 6);
 
   return (

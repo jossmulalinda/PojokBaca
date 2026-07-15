@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import axios from "axios";
-import { BASE_API_URL, BASE_API_KEY } from "@/lib/api";
+import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
 
 const NewsSlider = () => {
   const [news, setNews] = useState([]);
@@ -22,9 +22,12 @@ const NewsSlider = () => {
         },
       });
 
-      if (response.data && Array.isArray(response.data)) {
-        // Shuffle and select up to 5 news items
-        const shuffled = [...response.data].sort(() => 0.5 - Math.random());
+      const list = Array.isArray(response.data)
+        ? response.data
+        : (Array.isArray(response.data?.data) ? response.data.data : []);
+
+      if (list.length > 0) {
+        const shuffled = [...list].sort(() => 0.5 - Math.random());
         setNews(shuffled.slice(0, 5));
       }
     } catch (error) {
@@ -34,7 +37,6 @@ const NewsSlider = () => {
     }
   };
 
-  // Auto-slide every 5 seconds
   useEffect(() => {
     if (news.length <= 1) return;
     const interval = setInterval(() => {
@@ -51,14 +53,12 @@ const NewsSlider = () => {
     setCurrentIndex((prev) => (prev === news.length - 1 ? 0 : prev + 1));
   };
 
-  // Strip HTML tags for clean description
   const getExcerpt = (htmlContent) => {
     if (!htmlContent) return "";
     const plainText = htmlContent.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
     return plainText.length > 150 ? plainText.substring(0, 150) + "..." : plainText;
   };
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
@@ -103,7 +103,7 @@ const NewsSlider = () => {
           >
             {/* Background Image */}
             <img
-              src={`${BASE_API_URL}/storage/${item.gambar}`}
+              src={getImageUrl(item.gambar || item.thumbnail)}
               alt={item.judul}
               className="w-full h-full object-cover transform scale-100 transition-transform duration-[6000ms] ease-out"
               style={{
@@ -127,7 +127,7 @@ const NewsSlider = () => {
                     <svg className="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2zM9 16h6" />
                     </svg>
-                    <span>{item.kategori?.judul_kategori || "Berita Terbaru"}</span>
+                    <span>{item.kategori || "Berita Terbaru"}</span>
                   </div>
                 </div>
 

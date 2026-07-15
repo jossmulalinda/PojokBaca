@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { BASE_API_URL } from "@/lib/api";
+import { getImageUrl } from "@/lib/api";
 
 const NewsCardSmartphone = ({
   slug,
@@ -9,12 +9,14 @@ const NewsCardSmartphone = ({
   title,
   kategori,
   image,
+  thumbnail,
   konten,
   dibaca = 0,
   className = "",
   onClick,
 }) => {
-  // Strip HTML tags from konten for plain text preview and limit to 15 words
+  const imageSrc = image || thumbnail;
+
   const plainText = konten
     ? (() => {
         const text = konten.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
@@ -24,7 +26,6 @@ const NewsCardSmartphone = ({
       })()
     : "";
 
-  // Format date
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
     const d = new Date(dateStr);
@@ -213,9 +214,9 @@ const NewsCardSmartphone = ({
       <Link href={`/berita/${slug}`} onClick={handleClick} className="block">
         <div className="news-card-sp">
           <div className="news-card-sp-image">
-            {image && (
+            {imageSrc && (
               <img
-                src={`${BASE_API_URL}/storage/${image}`}
+                src={getImageUrl(imageSrc)}
                 alt={title || "Berita HMTI"}
                 loading="lazy"
               />

@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { BASE_API_URL } from "@/lib/api";
+import { getImageUrl } from "@/lib/api";
 
 const stripHtml = (html) => {
   if (!html) return "";
@@ -14,10 +14,8 @@ const getExcerpt = (content, maxWords = 15) => {
   return words.slice(0, maxWords).join(" ") + "...";
 };
 
-const CardSemuaBerita = ({ slug, gambar, kategori, judul, penulis, tanggal, konten, dibaca = 0, onClick }) => {
-  const handleError = (event) => {
-    event.target.src = "/assets/img/galeryIMG.png";
-  };
+const CardSemuaBerita = ({ slug, gambar, thumbnail, kategori, judul, penulis, tanggal, konten, dibaca = 0, onClick }) => {
+  const imageSrc = gambar || thumbnail;
 
   const handleClick = (e) => {
     if (onClick) {
@@ -44,13 +42,19 @@ const CardSemuaBerita = ({ slug, gambar, kategori, judul, penulis, tanggal, kont
       }}
     >
       {/* Image Header */}
-      <div className="relative h-48 w-full overflow-hidden">
-        <img
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          src={`${BASE_API_URL}/storage/${gambar}`}
-          alt={judul}
-          onError={handleError}
-        />
+      <div className="relative h-48 w-full overflow-hidden bg-slate-100 dark:bg-slate-800">
+        {imageSrc ? (
+          <img
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            src={getImageUrl(imageSrc)}
+            alt={judul || "Berita HMTI"}
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-medium">
+            No Image
+          </div>
+        )}
       </div>
 
       {/* Card Content */}
