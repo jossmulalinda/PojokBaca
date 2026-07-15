@@ -835,6 +835,7 @@ export default function BeritaAdmin() {
               <thead>
                 <tr className="bg-gray-50/50 dark:bg-gray-800/30 border-y border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-700 dark:text-gray-400">
                   <th className="px-6 py-3.5 w-16">No</th>
+                  <th className="px-6 py-3.5 w-20">Sampul</th>
                   <th className="px-6 py-3.5">Judul</th>
                   <th className="px-6 py-3.5 w-44">Kategori</th>
                   <th className="px-6 py-3.5 w-36 text-center">Proses</th>
@@ -849,6 +850,16 @@ export default function BeritaAdmin() {
                       {/* Index No */}
                       <td className="px-6 py-4 font-semibold text-gray-600 dark:text-gray-400">
                         {noIndex}
+                      </td>
+                      {/* Sampul Preview */}
+                      <td className="px-6 py-4">
+                        <div className="w-14 h-10 rounded-lg overflow-hidden border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+                          <img
+                            src={getImageUrl(beritaItem.thumbnail || beritaItem.gambar)}
+                            alt={beritaItem.judul}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
                       </td>
                       {/* Title */}
                       <td className="px-6 py-4 leading-relaxed font-semibold text-gray-900 dark:text-white">

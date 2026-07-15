@@ -21,6 +21,10 @@ export async function PUT(request, { params }) {
     }
 
     const userOld = existing.rows[0];
+    if (userOld.role === 'super_admin') {
+      return NextResponse.json({ message: 'Akun Super Admin utama tidak dapat diubah dari panel sub-admin.' }, { status: 403 });
+    }
+
     const { name, email, username, password, role } = await request.json();
 
     let hashedPassword = userOld.password;
@@ -43,7 +47,7 @@ export async function PUT(request, { params }) {
       ]
     });
 
-    return NextResponse.json({ message: 'Data admin berhasil diperbarui' });
+    return NextResponse.json({ message: 'Data sub-admin berhasil diperbarui' });
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
@@ -64,6 +68,11 @@ export async function DELETE(request, { params }) {
 
   try {
     const db = getDb();
+    const existing = await db.execute({ sql: 'SELECT * FROM users WHERE id = ? LIMIT 1', args: [id] });
+    if (existing.rows.length > 0 && existing.rows[0].role === 'super_admin') {
+      return NextResponse.json({ message: 'Akun Super Admin utama tidak dapat dihapus.' }, { status: 403 });
+    }
+
     await db.execute({ sql: 'DELETE FROM users WHERE id = ?', args: [id] });
     return NextResponse.json({ message: 'User berhasil dihapus' });
   } catch (error) {

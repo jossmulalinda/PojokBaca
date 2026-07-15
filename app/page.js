@@ -11,11 +11,16 @@ import EventCard from "@/components/Beranda/EventCard";
 import NewsCard from "@/components/Beranda/NewsCard";
 import NewsCardSmartphone from "@/components/Beranda/NewsCardSmartphone";
 import ImageCard from "@/components/Beranda/ImageCard";
-import { BASE_API_URL, BASE_API_KEY } from "@/lib/api";
-import NewsCardSmartphoneSkeleton from "@/components/Beranda/NewsCardSmartphoneSkeleton";
-import NewsCardSkeleton from "@/components/Beranda/NewsCardSkeleton";
-import Partners from "@/components/Beranda/Partners";
 import ImageCardSkeleton from "@/components/Beranda/ImageCardSkeleton";
+import { BASE_API_URL, BASE_API_KEY, getImageUrl } from "@/lib/api";
+
+const processKontenHtml = (html) => {
+  if (!html) return "";
+  const r2PublicUrl = "https://pub-dde94dbcda2d41c3968385f7f9df0370.r2.dev";
+  return html
+    .replace(/src=["'](?:https?:\/\/[^\/]+)?\/?storage\//gi, `src="${r2PublicUrl}/`)
+    .replace(/src=["']\/(berita|galeri|events|partners|pengurus)\//gi, `src="${r2PublicUrl}/$1/`);
+};
 
 export default function Beranda() {
   const [loadingBeritaPilihan, setLoadingBeritaPilihan] = useState(true);
@@ -86,17 +91,28 @@ export default function Beranda() {
     setTimeout(() => setShareCopied(false), 2000);
   };
 
-  // Lock body scroll when modal opens
+  // Lock body scroll and increment view count when modal opens
   useEffect(() => {
     if (selectedNews) {
       document.body.style.overflow = 'hidden';
+      if (selectedNews.slug) {
+        axios.get(`${BASE_API_URL}/api/berita/${selectedNews.slug}`, {
+          headers: { "P3RT-HMTI-API-KEY": BASE_API_KEY }
+        }).then(res => {
+          if (res.data?.dibaca !== undefined) {
+            const newCount = res.data.dibaca;
+            setSelectedNews(prev => prev ? { ...prev, dibaca: newCount } : null);
+            setBeritaPilihan(prev => prev.map(b => b.slug === selectedNews.slug ? { ...b, dibaca: newCount } : b));
+          }
+        }).catch(() => {});
+      }
     } else {
       document.body.style.overflow = 'unset';
     }
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [selectedNews]);
+  }, [selectedNews?.slug]);
 
   const fetchBeritaPilihan = async () => {
     setLoadingBeritaPilihan(true);
@@ -460,9 +476,9 @@ export default function Beranda() {
                 </div>
  
                 {/* Photo (Header Image) */}
-                <div className="w-full h-[320px] md:h-[450px] overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm mb-6 flex-shrink-0">
+                <div className="w-full h-[320px] md:h-[450px] overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800/80 shadow-sm mb-6 flex-shrink-0 bg-slate-100 dark:bg-slate-800">
                   <img
-                    src={`${BASE_API_URL}/storage/${selectedNews.gambar}`}
+                    src={getImageUrl(selectedNews.gambar || selectedNews.thumbnail)}
                     alt={selectedNews.judul}
                     className="w-full h-full object-cover"
                   />
@@ -471,7 +487,7 @@ export default function Beranda() {
                 {/* Description (Full HTML content) */}
                 <div 
                   className="text-justify leading-relaxed text-slate-750 dark:text-slate-200 text-base font-normal space-y-4 prose dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: selectedNews.konten }}
+                  dangerouslySetInnerHTML={{ __html: processKontenHtml(selectedNews.konten) }}
                 />
               </div>
             </div>

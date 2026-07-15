@@ -10,7 +10,8 @@ export async function GET(request) {
 
   try {
     const db = getDb();
-    const result = await db.execute('SELECT id, username, email, role, is_active, profile_image, created_at FROM users ORDER BY created_at DESC');
+    // Exclude super_admin accounts so the main superadmin account cannot be altered/deleted in sub-admin management
+    const result = await db.execute("SELECT id, username, email, role, is_active, profile_image, created_at FROM users WHERE role != 'super_admin' ORDER BY created_at DESC");
     const data = result.rows.map(u => ({
       ...u,
       name: u.username
@@ -29,7 +30,7 @@ export async function POST(request) {
   }
 
   try {
-    const { name, email, username, password, role } = await request.json();
+    const { name, email, username, password } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ message: 'Email dan password wajib diisi' }, { status: 422 });
@@ -48,7 +49,7 @@ export async function POST(request) {
     }
 
     const hashedPassword = await hashPassword(password);
-    const userRole = role || 'admin';
+    const userRole = 'sub_admin'; // Always force sub_admin for created accounts
     const isActive = 1;
 
     const insertResult = await db.execute({
@@ -63,7 +64,7 @@ export async function POST(request) {
       email,
       role: userRole,
       is_active: true,
-      message: 'Admin baru berhasil dibuat'
+      message: 'Sub-admin baru berhasil dibuat'
     }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ message: error.message }, { status: 500 });
